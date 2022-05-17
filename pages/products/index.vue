@@ -127,12 +127,12 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
-      userId: "tuhath2006022",
       listProduct: [],
-      shoppingCart: {},
       createShoppingCartData: {
         userId: "",
         cartItemDTOSet: [],
@@ -166,6 +166,9 @@ export default {
       this.getPageProduct();
     },
   },
+  computed: {
+    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+  },
   methods: {
     getPageProduct() {
       this.$store
@@ -196,28 +199,19 @@ export default {
       this.getPageProduct();
     },
     getShoppingCart() {
-      this.createShoppingCartData.userId = this.userId;
-
-      this.$store
-        .dispatch("shopping/sGetShoppingCartByUserId", this.userId)
-        .then((res) => {
-          let cartItemsData = [];
-          this.shoppingCart = res;
-          this.shoppingCart.cartItems.forEach((e) => {
-            cartItemsData.push({
-              productId: e.id.productId,
-              quantity: e.quantity,
-              status: e.status,
-            });
-          });
-          this.createShoppingCartData.cartItemDTOSet = [...cartItemsData];
-        });
+      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {
+        this.createShoppingCartData.userId = this.userId
+        this.createShoppingCartData.cartItemDTOSet = this._.cloneDeep(
+          this.cartItemsData
+        );
+      });
     },
     createShoppingCart() {
       this.$store
         .dispatch("shopping/sCreateShoppingCart", this.createShoppingCartData)
         .then(() => {
           this.$toast.success("Add To Cart Success!!!");
+          this.getShoppingCart()
         });
     },
     addToCart(productId) {

@@ -109,8 +109,22 @@ body {
   display: flex;
 }
 
-.header-right .header-right-item{
-    margin-left: 20px;
+.header-right .header-right-item {
+  position: relative;
+  margin-left: 20px;
+}
+
+.header-right .header-right-item .cart-quantity{
+  position: absolute;
+  background: #0099cc;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 0 6px;
+  font-size: 12px;
+  opacity: .9;
+  top: -10px;
+  right: -10px;
 }
 
 .header-right .header-right-item svg {

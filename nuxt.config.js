@@ -1,5 +1,13 @@
 import customRoutes from "./plugins/routes.js";
 export default {
+  target: 'server',
+
+  server: {
+    port: 3000,
+    host: 'localhost', // default: localhost,
+    timing: false
+  },
+  ssr: false,
   router: {
     extendRoutes(routes, resolve) {
       for (const r of customRoutes) {

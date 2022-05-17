@@ -50,9 +50,7 @@
                 <div class="product-quantity">
                   <b-icon
                     @click="
-                      cartItemInfo.quantity > 0
-                        ? cartItemInfo.quantity--
-                        : (cartItemInfo.quantity = 0)
+                      cartItemInfo.quantity > 0 ? cartItemInfo.quantity-- : 0
                     "
                     class="dash-icon"
                     icon="dash-circle"
@@ -63,14 +61,13 @@
                     icon="plus-circle"
                   ></b-icon>
                   <input
-                    min="0"
                     v-model="cartItemInfo.quantity"
                     type="number"
                     class="form-control"
                     placeholder="Quantity"
                   />
                 </div>
-                <button class="btn btn-add-to-cart">
+                <button class="btn btn-add-to-cart" @click="addToCart">
                   <b-icon icon="cart-plus"></b-icon> Add To Cart
                 </button>
                 <div class="share-social d-flex">
@@ -109,19 +106,26 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
       detailProduct: {},
+      createShoppingCartData: {
+        userId: "",
+        cartItemDTOSet: [],
+      },
       cartItemInfo: {
-        quantity: 0,
+        productId: "",
+        quantity: 1,
       },
       breadCrumbData: {
         name: "Product Details",
-        parentName: 'Products',
-        parentPath: '/products',
-        childName: '',
-        childPath: ''
+        parentName: "Products",
+        parentPath: "/products",
+        childName: "",
+        childPath: "",
       },
       swiperOptionTop: {
         loop: true,
@@ -149,16 +153,55 @@ export default {
   },
   created() {
     this.getProductById();
+    this.getShoppingCart();
+  },
+  computed: {
+    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
   },
   methods: {
+    getShoppingCart() {
+      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {
+        this.createShoppingCartData.userId = this.userId
+        this.createShoppingCartData.cartItemDTOSet = this._.cloneDeep(
+          this.cartItemsData
+        );
+      });
+    },
+    createShoppingCart() {
+      this.$store
+        .dispatch("shopping/sCreateShoppingCart", this.createShoppingCartData)
+        .then(() => {
+          this.$toast.success("Add To Cart Success!!!");
+          this.getShoppingCart()
+        });
+    },
     getProductById() {
       this.$store
         .dispatch("shopping/sGetProductById", this.$route.params.id)
         .then((res) => {
           this.detailProduct = res;
+          this.cartItemInfo.productId = res.id;
           this.breadCrumbData.childName = this.detailProduct.name;
           this.breadCrumbData.childPath = this.detailProduct.slug;
         });
+    },
+    addToCart() {
+      if (this.cartItemInfo.quantity > 0) {
+        let findCartItem = this.createShoppingCartData.cartItemDTOSet.find(
+          (o) => o.productId === this.cartItemInfo.productId
+        );
+
+        if (!findCartItem) {
+          let cartItem = { ...this.cartItemInfo };
+          this.createShoppingCartData.cartItemDTOSet.push(cartItem);
+        } else {
+          findCartItem.quantity += this.cartItemInfo.quantity;
+        }
+
+        this.createShoppingCart();
+      } else {
+        this.$toast.error("Quantity needs to be greater than 0 !!!");
+      }
     },
   },
 };

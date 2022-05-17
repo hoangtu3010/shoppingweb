@@ -47,7 +47,7 @@
                       min="0"
                       type="number"
                       v-model="
-                        createShoppingCartData.cartItemDTOSet.find(
+                        cartItemsData.find(
                           (x) => x.productId === item.id.productId
                         ).quantity
                       "
@@ -96,15 +96,15 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
-      userId: "tuhath2006022",
       createShoppingCartData: {
         userId: "",
         cartItemDTOSet: [],
       },
-      shoppingCart: {},
       breadCrumbData: {
         name: "Shopping Cart",
         parentName: "Shopping Cart",
@@ -117,28 +117,17 @@ export default {
   created() {
     this.getShoppingCart();
   },
+  computed: {
+    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+  },
   methods: {
     getShoppingCart() {
-      this.$store
-        .dispatch("shopping/sGetShoppingCartByUserId", this.userId)
-        .then((res) => {
-          let cartItemsData = [];
-          res.cartItems = this._.sortBy(res.cartItems, [
-            function (o) {
-              return o.quantity;
-            },
-          ]);
-          this.shoppingCart = res;
-          this.createShoppingCartData.userId = this.userId;
-          this.shoppingCart.cartItems.forEach((e) => {
-            cartItemsData.push({
-              productId: e.id.productId,
-              quantity: e.quantity,
-              status: e.status,
-            });
-          });
-          this.createShoppingCartData.cartItemDTOSet = [...cartItemsData];
-        });
+      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {
+        this.createShoppingCartData.userId = this.userId;
+        this.createShoppingCartData.cartItemDTOSet = this._.cloneDeep(
+          this.cartItemsData
+        );
+      });
     },
     createShoppingCart() {
       this.$store

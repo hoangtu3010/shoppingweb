@@ -6,6 +6,7 @@
         <div class="col-md-8">
           <div class="billing-detail">
             <h5>Billing details</h5>
+            <!-- <pre>{{createOrderData}}</pre> -->
             <hr />
             <div class="billing-form">
               <div class="d-flex">
@@ -17,6 +18,7 @@
                     type="text"
                     placeholder="Enter name"
                     required
+                    v-model="createOrderData.shipName"
                   ></b-form-input>
                 </b-form-group>
                 <b-form-group label="Your Phone" class="mb-2 w-100">
@@ -24,6 +26,7 @@
                     type="text"
                     placeholder="Enter phone"
                     required
+                    v-model="createOrderData.shipPhone"
                   ></b-form-input>
                 </b-form-group>
               </div>
@@ -32,29 +35,35 @@
                   type="text"
                   placeholder="Enter address"
                   required
+                  v-model="createOrderData.shipAddress"
                 ></b-form-input>
               </b-form-group>
-              
+
               <b-form-group label="Note" class="mb-2 mt-3 w-100">
-               <b-form-textarea placeholder="Note..." rows="6"></b-form-textarea>
+                <b-form-textarea
+                  placeholder="Note..."
+                  rows="6"
+                  v-model="createOrderData.shipNote"
+                ></b-form-textarea>
               </b-form-group>
-              
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="checkout-info">
             <h5 class="checkout-title">Your Order</h5>
-            <div>
-              <span>Product 1</span> <span>{{ formatDollar(158) }}</span>
-            </div>
-            <div>
-              <span>Product 2</span> <span>{{ formatDollar(20) }}</span>
-            </div>
-            <div>
-              <span>Total</span
-              ><span class="checkout-total">{{ formatDollar(178) }}</span>
-            </div>
+            <template v-if="shoppingCart">
+              <div v-for="(item, index) in shoppingCart.cartItems" :key="index">
+                <span>{{ item.productName }}</span>
+                <span>{{ formatDollar(item.unitPrice) }}</span>
+              </div>
+              <div>
+                <span>Total</span
+                ><span class="checkout-total">{{
+                  formatDollar(shoppingCart.totalPrice)
+                }}</span>
+              </div>
+            </template>
             <button class="btn checkout-btn">
               Place Order <b-icon icon="arrow-right"></b-icon>
             </button>
@@ -66,9 +75,17 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
+      createOrderData: {
+        shipName: '',
+        shipAddress: '',
+        shipPhone: '',
+        shipNote: '',
+      },
       breadCrumbData: {
         name: "Checkout",
         parentName: "Checkout",
@@ -78,12 +95,16 @@ export default {
       },
     };
   },
+  created(){
+    this.getShoppingCart()
+  },
+  computed: {
+    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+  },
   methods: {
-    removeFromCart() {
-      this.$toast.error("Do you want remove ?");
+    getShoppingCart() {
+      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {});
     },
-    minusQuantity() {},
-    plusQuantity() {},
   },
 };
 </script>

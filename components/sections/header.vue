@@ -24,10 +24,12 @@
         </ul>
         <div class="header-right">
           <div class="header-right-item">
-            <nuxt-link to="/cart"> <b-icon icon="cart4"></b-icon></nuxt-link>
+            <nuxt-link to="/cart"> <b-icon icon="cart4"></b-icon><span class="cart-quantity">{{shoppingCart.cartItems ? shoppingCart.cartItems.length : 0}}</span></nuxt-link>
           </div>
           <div class="header-right-item">
-            <nuxt-link to="/auth/login"> <b-icon icon="person-circle"></b-icon></nuxt-link>
+            <nuxt-link to="/auth/login">
+              <b-icon icon="person-circle"></b-icon
+            ></nuxt-link>
           </div>
         </div>
       </div>
@@ -36,11 +38,14 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   data() {
-    return {};
+    return {
+    };
   },
-  created() {},
+  created() {
+  },
   mounted() {
     const selectElement = function (element) {
       return document.querySelector(element);
@@ -54,6 +59,11 @@ export default {
         selectElement("#header").classList.remove("sticky");
       }
     };
+  },
+  computed: {
+    ...mapGetters("shopping", ["shoppingCart"]),
+  },
+  methods: {
   },
 };
 </script>
