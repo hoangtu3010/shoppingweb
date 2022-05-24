@@ -3,24 +3,44 @@
     <div class="container">
       <div class="row">
         <div class="col-md-3 sidebar-left">
-          <h4 style="font-weight: 700">
+          <h4 style="font-weight: 700" class="pb-3">
             <b-icon icon="filter-circle"></b-icon> Filters
           </h4>
-          <hr />
           <p class="filter-title">
-            <b-icon icon="caret-right-fill"></b-icon> Theo danh mục
+            <b-icon icon="caret-right-fill"></b-icon> Category
           </p>
-          <ul class="category-filter">
-            <li class="category-filter-item">
-              <nuxt-link to="/">Category 1</nuxt-link>
-            </li>
-            <li class="category-filter-item">
-              <nuxt-link to="/">Category 1</nuxt-link>
-            </li>
-            <li class="category-filter-item">
-              <nuxt-link to="/">Category 1</nuxt-link>
+          <ul class="sidebar-filter category-filter">
+            <li
+              v-for="(item, index) in listCategories"
+              :key="index"
+              class="category-filter-item"
+            >
+              <span
+                @click="filterByCategory(item.id)"
+                :class="
+                  objParams.categoryId === item.id ? 'category-active' : ''
+                "
+                >{{ item.name }}</span
+              >
             </li>
           </ul>
+          <p class="filter-title">
+            <b-icon icon="caret-right-fill"></b-icon> Price
+          </p>
+          <div class="sidebar-filter">
+            <multiselect
+              v-model="sortSelected"
+              track-by="code"
+              label="text"
+              placeholder="Price"
+              :options="options"
+              :searchable="false"
+              :show-labels="false"
+              class="price-filter"
+              show-no-results
+            >
+            </multiselect>
+          </div>
         </div>
         <div class="col-md-9 content-main">
           <div class="content-tools">
@@ -30,26 +50,13 @@
                 class="form-control"
                 @keyup.enter="search"
                 v-model="objParams.keyword"
-                placeholder="Enter name or category...."
+                placeholder="Enter name..."
               />
               <b-icon
                 icon="search"
                 @click="search"
                 style="cursor: pointer"
               ></b-icon>
-            </div>
-            <div class="content-filter">
-              <multiselect
-                v-model="sortSelected"
-                track-by="code"
-                label="text"
-                placeholder="Giá"
-                :options="options"
-                :searchable="false"
-                :show-labels="false"
-                show-no-results
-              >
-              </multiselect>
             </div>
           </div>
           <div class="row">
@@ -68,7 +75,7 @@
                       ></b-icon>
                     </a>
                   </div>
-                  <nuxt-link :to="'/products' + product.slug">
+                  <nuxt-link :to="'/products/' + product.slug">
                     <img :src="product.thumbnail" alt="" />
                   </nuxt-link>
                 </div>
@@ -77,7 +84,7 @@
                 </div>
                 <div class="info-content">
                   <p class="text-center">
-                    <nuxt-link :to="'/products' + product.slug">{{
+                    <nuxt-link :to="'/products/' + product.slug">{{
                       product.name
                     }}</nuxt-link>
                   </p>
@@ -133,8 +140,8 @@ export default {
   data() {
     return {
       listProduct: [],
+      listCategories: [],
       createShoppingCartData: {
-        userId: "",
         cartItemDTOSet: [],
       },
       pagingData: {
@@ -144,7 +151,8 @@ export default {
       },
       objParams: {
         pageIndex: 1,
-        pageSize: 2,
+        pageSize: 12,
+        categoryId: 0,
       },
       sortSelected: null,
       options: [
@@ -156,6 +164,7 @@ export default {
   created() {
     this.getPageProduct();
     this.getShoppingCart();
+    this.getListCategories();
   },
   watch: {
     sortSelected(val) {
@@ -167,7 +176,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+    ...mapGetters("shopping", ["shoppingCart", "cartItemsData", "loggedIn"]),
   },
   methods: {
     getPageProduct() {
@@ -179,6 +188,15 @@ export default {
           this.pagingData.totalElements = res.totalElements;
           this.pagingData.numberOfElements = res.numberOfElements;
         });
+    },
+    filterByCategory(id) {
+      if (this.objParams.categoryId === id) {
+        this.objParams.categoryId = 0;
+      } else {
+        this.objParams.categoryId = id;
+      }
+
+      this.getPageProduct();
     },
     search() {
       this.objParams.pageIndex = 1;
@@ -199,20 +217,28 @@ export default {
       this.getPageProduct();
     },
     getShoppingCart() {
-      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {
-        this.createShoppingCartData.userId = this.userId
+      this.$store.dispatch("shopping/sGetShoppingCart").then(() => {
         this.createShoppingCartData.cartItemDTOSet = this._.cloneDeep(
           this.cartItemsData
         );
       });
     },
+    getListCategories() {
+      this.$store.dispatch("shopping/sGetListCategory").then((res) => {
+        this.listCategories = res;
+      });
+    },
     createShoppingCart() {
-      this.$store
-        .dispatch("shopping/sCreateShoppingCart", this.createShoppingCartData)
-        .then(() => {
-          this.$toast.success("Add To Cart Success!!!");
-          this.getShoppingCart()
-        });
+      if (this.$auth.loggedIn) {
+        this.$store
+          .dispatch("shopping/sCreateShoppingCart", this.createShoppingCartData)
+          .then(() => {
+            this.$toast.success("Add To Cart Success!!!");
+            this.getShoppingCart();
+          });
+      } else {
+        this.$toast.error("Sign in to continue");
+      }
     },
     addToCart(productId) {
       let findProductFromCart = this.createShoppingCartData.cartItemDTOSet.find(
@@ -233,6 +259,27 @@ export default {
 };
 </script>
 
+<style>
+.price-filter {
+  cursor: pointer;
+}
+
+.price-filter .multiselect__tags {
+  border: none;
+  background: transparent;
+  padding-left: 0;
+}
+
+.price-filter .multiselect__select {
+  right: 10px;
+}
+
+.price-filter .multiselect__tags .multiselect__placeholder {
+  color: #6f6c6c;
+  font-size: 16px;
+}
+</style>
+
 <style scoped>
 .section-product-list {
   padding: 20px 0;
@@ -243,24 +290,33 @@ export default {
   border-radius: 10px;
 }
 
+.sidebar-left .sidebar-filter {
+  padding-left: 23px;
+}
+
 .filter-title {
   color: #000;
   font-size: 18px;
+  border-top: 2px solid #fff;
+  padding-top: 15px;
 }
 
 .category-filter .category-filter-item {
   list-style: none;
-  padding-left: 25px;
   margin-bottom: 15px;
+  cursor: pointer;
 }
 
-.category-filter .category-filter-item a {
-  text-decoration: none;
+.category-filter .category-filter-item .category-active {
+  color: #41adde;
+}
+
+.category-filter .category-filter-item {
   color: #6f6c6c;
   transition: 0.2s;
 }
 
-.category-filter .category-filter-item a:hover {
+.category-filter .category-filter-item:hover {
   color: #41adde;
 }
 
@@ -280,13 +336,14 @@ export default {
 
 .content-main .content-tools .content-search input {
   border-radius: 20px;
-  min-width: 300px;
+  transition: 0.3s;
 }
 
 .content-main .content-tools .content-search input:focus {
   box-shadow: none;
   outline: none;
   border-color: #0099cc;
+  width: 300px;
 }
 
 .content-main .content-tools .content-search svg {
@@ -294,10 +351,6 @@ export default {
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-}
-
-.content-main .content-tools .content-filter {
-  min-width: 200px;
 }
 
 .content-main .content-item {
@@ -321,6 +374,15 @@ export default {
   color: #fff;
   padding: 0 5px;
   border-top-left-radius: 5px;
+}
+
+.content-main .content-item .content-tag span {
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  max-width: 145px;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .content-main .content-item .image-content .content-icon svg {

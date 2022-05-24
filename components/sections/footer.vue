@@ -37,7 +37,7 @@
             <div class="about-widget">
               <nuxt-link to="/"><img src="/logo.png" alt="logo" /> <span>PiAiMart</span></nuxt-link>
               <p>
-                Online Mall is the most exclusive shopping mall and entertainment center. Located in an area that is best known for its high-end stores and restaurants.
+                PiAiMart is the most exclusive store and entertainment center. Located in an area that is best known for its high-end stores and restaurants.
               </p>
               <ul class="social">
                 <li class="social-item">

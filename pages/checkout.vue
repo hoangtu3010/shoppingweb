@@ -64,7 +64,7 @@
                 }}</span>
               </div>
             </template>
-            <button class="btn checkout-btn">
+            <button class="btn checkout-btn" @click="createOrder">
               Place Order <b-icon icon="arrow-right"></b-icon>
             </button>
           </div>
@@ -99,11 +99,17 @@ export default {
     this.getShoppingCart()
   },
   computed: {
-    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+    ...mapGetters("shopping", ["shoppingCart", "cartItemsData"]),
   },
   methods: {
     getShoppingCart() {
-      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {});
+      this.$store.dispatch("shopping/sGetShoppingCart").then(() => {});
+    },
+    createOrder() {
+      this.$store.dispatch("shopping/sCreateOrder", this.createOrderData).then(() => {
+        this.$toast.success('Create order success !!!');
+        this.$router.push({name: 'products'})
+      });
     },
   },
 };

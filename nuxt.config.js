@@ -1,11 +1,40 @@
 import customRoutes from "./plugins/routes.js";
+import apiUrl from "./constants/api.js";
+
 export default {
-  target: 'server',
+  target: "server",
 
   server: {
     port: 3000,
-    host: 'localhost', // default: localhost,
-    timing: false
+    host: "localhost", // default: localhost,
+    timing: false,
+  },
+  auth: {
+    redirect: {
+      login: '/login',
+      logout: '/login',
+      callback: '/login',
+      home: '/'
+    },
+    strategies: {
+      local: {
+        token: {
+          property: 'accessToken',
+        },
+        user: {
+          property: 'user'
+        },
+        user: {},
+        endpoints: {
+          login: {
+            url: apiUrl.AUTH_LOGIN,
+            method: "post",
+          },
+          user: { url: apiUrl.AUTH_USER, method: "get" },
+          logout: false,
+        },
+      },
+    },
   },
   ssr: false,
   router: {
@@ -56,7 +85,7 @@ export default {
     { src: "~/plugins/api" },
     { src: "~/plugins/swiper.js", ssr: false },
     "@/plugins/mixins/util",
-    "@/plugins/lodash"
+    "@/plugins/lodash",
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -73,6 +102,7 @@ export default {
     "@nuxtjs/axios",
     "@nuxtjs/toast",
     "nuxt-vue-multiselect",
+    "@nuxtjs/auth-next",
   ],
   bootstrapVue: {
     icons: true,

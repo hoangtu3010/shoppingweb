@@ -24,12 +24,22 @@
         </ul>
         <div class="header-right">
           <div class="header-right-item">
-            <nuxt-link to="/cart"> <b-icon icon="cart4"></b-icon><span class="cart-quantity">{{shoppingCart.cartItems ? shoppingCart.cartItems.length : 0}}</span></nuxt-link>
+            <nuxt-link to="/cart">
+              <b-icon icon="cart4"></b-icon
+              ><span class="cart-quantity">{{
+                shoppingCart.cartItems ? shoppingCart.cartItems.length : 0
+              }}</span></nuxt-link
+            >
           </div>
           <div class="header-right-item">
-            <nuxt-link to="/auth/login">
+            <nuxt-link v-if="!$auth.loggedIn" to="/login">
               <b-icon icon="person-circle"></b-icon
             ></nuxt-link>
+            <b v-else>{{ $auth.user.userName }}</b>
+            <!-- <span v-if="loggedIn" @click="logout()">Logout</span> -->
+          </div>
+          <div v-if="$auth.loggedIn" class="header-right-item">
+            <span @click="logout">Logout</span>
           </div>
         </div>
       </div>
@@ -41,11 +51,9 @@
 import { mapGetters } from "vuex";
 export default {
   data() {
-    return {
-    };
+    return {};
   },
-  created() {
-  },
+  created() {},
   mounted() {
     const selectElement = function (element) {
       return document.querySelector(element);
@@ -64,6 +72,11 @@ export default {
     ...mapGetters("shopping", ["shoppingCart"]),
   },
   methods: {
+    logout() {
+      this.$auth.logout().then(() => {
+        this.$store.dispatch("shopping/sGetShoppingCart");
+      });
+    },
   },
 };
 </script>

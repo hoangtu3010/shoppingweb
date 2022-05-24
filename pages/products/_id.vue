@@ -113,7 +113,6 @@ export default {
     return {
       detailProduct: {},
       createShoppingCartData: {
-        userId: "",
         cartItemDTOSet: [],
       },
       cartItemInfo: {
@@ -156,12 +155,11 @@ export default {
     this.getShoppingCart();
   },
   computed: {
-    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+    ...mapGetters("shopping", ["shoppingCart", "cartItemsData"]),
   },
   methods: {
     getShoppingCart() {
-      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {
-        this.createShoppingCartData.userId = this.userId
+      this.$store.dispatch("shopping/sGetShoppingCart").then(() => {
         this.createShoppingCartData.cartItemDTOSet = this._.cloneDeep(
           this.cartItemsData
         );

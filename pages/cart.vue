@@ -8,6 +8,8 @@
             <thead>
               <tr>
                 <th>Product</th>
+                <th></th>
+                <th></th>
                 <th>Quantity</th>
                 <th>Total</th>
                 <th></th>
@@ -23,10 +25,14 @@
                   <img
                     :src="item.productThumbnail"
                     width="80"
-                    height="80px"
                     alt=""
+                    style="border-radius: 10px"
                   />
+                </td>
+                <td>
                   <span class="cart-item-name">{{ item.productName }}</span>
+                </td>
+                <td>
                   <span class="cart-item-price">{{
                     formatDollar(item.unitPrice)
                   }}</span>
@@ -99,10 +105,10 @@
 import { mapGetters } from "vuex";
 
 export default {
+  // middleware: 'auth',
   data() {
     return {
       createShoppingCartData: {
-        userId: "",
         cartItemDTOSet: [],
       },
       breadCrumbData: {
@@ -118,12 +124,11 @@ export default {
     this.getShoppingCart();
   },
   computed: {
-    ...mapGetters("shopping", ["userId", "shoppingCart", "cartItemsData"]),
+    ...mapGetters("shopping", ["shoppingCart", "cartItemsData"]),
   },
   methods: {
     getShoppingCart() {
-      this.$store.dispatch("shopping/sGetShoppingCartByUserId").then(() => {
-        this.createShoppingCartData.userId = this.userId;
+      this.$store.dispatch("shopping/sGetShoppingCart").then(() => {
         this.createShoppingCartData.cartItemDTOSet = this._.cloneDeep(
           this.cartItemsData
         );

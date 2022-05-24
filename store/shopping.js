@@ -1,6 +1,5 @@
 export default {
   state: () => ({
-    userId: "account_1",
     shoppingCart: {},
     cartItemsData: [],
   }),
@@ -10,9 +9,20 @@ export default {
     },
     SET_CART_ITEM_DATA: (state, data) => {
       state.cartItemsData = data;
-    },
+    }
   },
   actions: {
+    sLogin({commit}, data){
+      return new Promise((resolve, reject) => {
+        return this.$auth.loginWith("local", { data: data })
+          .then((res) => {
+            return resolve(res);
+          })
+          .catch((err) => {
+            return reject(err);
+          });
+      });
+    },
     sGetPageProduct({ commit }, data) {
       return new Promise((resolve, reject) => {
         return this.$axios
@@ -37,10 +47,22 @@ export default {
           });
       });
     },
-    sGetShoppingCartByUserId({ state, commit }) {
+    sGetListCategory({ commit }) {
       return new Promise((resolve, reject) => {
         return this.$axios
-          .get(this.$api.GET_SHOPPING_CART, { params: { userId: state.userId } })
+          .get(this.$api.GET_CATEGORY)
+          .then((res) => {
+            return resolve(res.data);
+          })
+          .catch((err) => {
+            return reject(err);
+          });
+      });
+    },
+    sGetShoppingCart({ state, commit }) {
+      return new Promise((resolve, reject) => {
+        return this.$axios
+          .get(this.$api.GET_SHOPPING_CART)
           .then((res) => {
             res.data.cartItems = _.sortBy(res.data.cartItems, [
               function (o) {
@@ -76,10 +98,21 @@ export default {
           });
       });
     },
+    sCreateOrder({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        return this.$axios
+          .post(this.$api.ORDER, data)
+          .then((res) => {
+            return resolve(res.data);
+          })
+          .catch((err) => {
+            return reject(err);
+          });
+      });
+    },
   },
   getters: {
-    userId: (state) => state.userId,
     shoppingCart: (state) => state.shoppingCart,
-    cartItemsData: (state) => state.cartItemsData
+    cartItemsData: (state) => state.cartItemsData,
   },
 };
