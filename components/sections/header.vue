@@ -35,7 +35,7 @@
             <nuxt-link v-if="!$auth.loggedIn" to="/login">
               <b-icon icon="person-circle"></b-icon
             ></nuxt-link>
-            <b v-else>{{ $auth.user.userName }}</b>
+            <b v-else>{{ $auth.user.username }}</b>
             <!-- <span v-if="loggedIn" @click="logout()">Logout</span> -->
           </div>
           <div v-if="$auth.loggedIn" class="header-right-item">

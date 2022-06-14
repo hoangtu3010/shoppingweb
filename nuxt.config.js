@@ -22,7 +22,10 @@ export default {
           property: 'accessToken',
         },
         user: {
-          property: 'user'
+          property: ''
+        },
+        refreshToken: {
+          property: 'refreshToken'
         },
         user: {},
         endpoints: {

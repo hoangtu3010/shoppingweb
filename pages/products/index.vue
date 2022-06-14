@@ -237,6 +237,7 @@ export default {
             this.getShoppingCart();
           });
       } else {
+        this.$router.push("/login")
         this.$toast.error("Sign in to continue");
       }
     },
